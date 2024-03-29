@@ -1,0 +1,69 @@
+---
+title: "Analysis of Trust in People and Parliament"
+output: html_document
+---
+## Introduction
+In this exercise, we will perform a simple Data Analysis. For my project I decided to analyze data from the European Social Survey (ESS). I chose the most comprehensive dataset from 2018 (ESS round 9), accessed via the ESS Data Portal. The survey data contains information on trust in people and trust in parliament, among other variables. The goal of this analysis is to investigate the relationship between trust in people and trust in parliament.
+
+## Research Question
+
+Is general trust in people correlated to trust in a country's parliament?
+
+## Empirical Hypothesis
+
+People that don't trust other people also tend not to trust the parliament, attributing their distrust broadly to individuals irrespective of their roles.
+
+## Data Preparation
+
+The analysis begins with setting up the required packages and reading in the data.
+
+```{r setup, message=FALSE}
+library(tidyverse)
+data <- read_csv("data/ess.csv")
+```
+
+## Data Filtering
+
+To maintain consistency and relevance, we filter the dataset to include only responses where trust in people (ppltrst) and trust in parliament (trstprl) are rated up to 10. All values higher correlate to answers like "I don't know" or "N.A." and are thus excluded.
+
+```{r filter, message=FALSE}
+filtered_data <- data %>%
+  filter(trstprl <= 10, ppltrst <= 10)
+```
+
+## Data Visualization
+
+We then create boxplots to visually examine the distribution of trust in parliament across different levels of trust in people.
+
+```{r boxplot, message=FALSE}
+plot <- ggplot(filtered_data, aes(x = as.factor(ppltrst), y = trstprl)) +
+  geom_boxplot() +
+  labs(x = "Trust in People", y = "Trust in Parliament") +
+  theme_minimal()
+plot
+```
+
+The plot is saved as a PNG file for inclusion in reports or presentations.
+
+```{r save_plot, message=FALSE}
+ggsave("plot/boxplot.png", plot, width = 8, height = 6)
+```
+
+## Linear Regression Analysis
+
+A simple linear regression is performed to quantify the relationship between trust in people and trust in parliament.
+
+```{r regression, message=FALSE}
+model <- lm(trstprl ~ ppltrst, data = filtered_data)
+summary(model)
+```
+
+## Regression Analysis Interpretation
+
+The regression analysis indicates a positive relationship between trust in people (ppltrst) and trust in parliament (trstprl). Specifically, the coefficient for ppltrst is 0.39591, suggesting that for each one-point increase in trust in people, trust in parliament increases by approximately 0.396 points. This result is statistically significant, as indicated by the p-value (< 2.2e-16).
+
+The R-squared value of 0.1377 implies that around 13.77% of the variability in trust in parliament can be explained by trust in people. While this shows a significant relationship, a large portion of the variance remains unexplained by this model, suggesting that other factors may also play crucial roles in determining trust in parliament.
+
+## Conclusion
+
+The analysis supports the hypothesis that there is a positive correlation between trust in people and trust in parliament. This finding aligns with the intuitive notion that general trust or distrust in individuals extends to institutions composed of those individuals, such as the parliament. Further research could explore additional variables that may influence trust in political institutions.
